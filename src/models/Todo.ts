@@ -1,15 +1,21 @@
-import { prop, Ref } from '@typegoose/typegoose';
+import { Column, Entity, ManyToOne, ManyToMany, JoinTable } from 'typeorm';
+import { BaseModel } from './base.model';
 import { Category } from './Category';
 import { User } from './User';
-class Todo{
-    @prop({required:true, unique:true})
-    public title?:string;
-    @prop()
+
+@Entity()
+class Todo extends BaseModel {
+    @Column('varchar', {nullable:false, unique:true})
+    public title!:string;
+    @Column('varchar')
     public description?:string;
-    @prop({ref:()=>Category})
-    public category?:Ref<Category>
-    @prop({ref:()=>User})
-    public user?:Ref<User>;
+    @ManyToMany(() => Category, (category) => category.todos)
+    @JoinTable({
+        name:'todos_categories'
+    })
+    public category!:Category
+    @ManyToOne(() => User, (user) => user.todos)
+    public user!:User;
 }
 
 export{Todo};
