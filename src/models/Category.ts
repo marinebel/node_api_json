@@ -8,7 +8,7 @@ class Category extends BaseModel{
     public title!:string;
 
     @ManyToMany(() => Todo, (todo) => todo.category)
-    public todos!:Todo;
+    public todos!:Todo[];
 }
 
 export{Category};
