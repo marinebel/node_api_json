@@ -3,7 +3,6 @@ import { Category } from './models/Category';
 import { Todo } from './models/Todo';
 import { User } from './models/User';
 
-
 class DatabaseConnector{
     static async initDatabase(){
         try{
