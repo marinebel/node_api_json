@@ -4,8 +4,12 @@ import { Todo } from './Todo';
 
 @Entity()
 class User extends BaseModel{
-    @Column('varchar', {nullable:false, unique:true})
+    @Column({nullable:false, unique:true})
     public email!:string;
+    
+    @Column({nullable:false, unique:true})
+    public password!:string;
+    
     @OneToMany(() => Todo, (todo) => todo.user)
     public todos?: Todo[];
 }

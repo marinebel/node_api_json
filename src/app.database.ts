@@ -4,24 +4,25 @@ import { Todo } from './models/Todo';
 import { User } from './models/User';
 
 
-class DatabasConnector{
+class DatabaseConnector{
     static async initDatabase(){
         try{
-            const connexion = createConnection({
+            const connection = createConnection({
                 type:'mysql',
                 username:'root',
                 password:'test',
                 host:'localhost',
+                name:'default',
                 port: 3306,
-                database: 'tpk_api',
+                database: 'todo_typeorm',
                 synchronize:true,
                 entities: [User, Todo, Category]
             });
-            return connexion;
+            return connection;
         } catch(error){
             return false;
         }
     }
 }
 
-export {DatabasConnector};
+export {DatabaseConnector};

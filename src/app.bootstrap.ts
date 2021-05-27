@@ -3,7 +3,6 @@ import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import { ErrorMiddleware } from './middlewares/Errors';
-import { PassportConfig } from './middlewares/Passport';
 import { apiRouter } from './routes/api.router';
 import { apiAuthRouter } from './routes/auth.router';
 import { apiUsersRouter } from './routes/user.router';
@@ -15,7 +14,6 @@ app.use(cors());
 app.use(json());
 
 //PASSPORT CONFIGURATION
-app.use(PassportConfig.configure);
 app.use(apiAuthRouter);
 app.use(apiRouter);
 app.use(apiUsersRouter);

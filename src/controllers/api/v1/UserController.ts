@@ -1,33 +1,49 @@
-import { getModelForClass } from '@typegoose/typegoose';
-import { Request, response, Response } from 'express';
+import { Request, Response } from 'express';
+import { getRepository } from 'typeorm';
 import { User } from '../../../models/User';
 
 
 class UserController {
-    static model = getModelForClass(User)
 
     static create = async(req:Request, res:Response) => {
-        return res.json({user: await UserController.model.register(req.body, req.body.password)});
+        const userRepository = getRepository(User);
+        const newUser = userRepository.create({
+            email:req.body.email,
+            password:req.body.password
+        });
+
+        await userRepository.save(newUser);
+        return res.json({users:await userRepository.find({})});
     }
-
-
-
 
     static update = async(req:Request, res:Response) => {
+        const userRepository = getRepository(User);
         const {id} = req.params;
-        return res.json(await UserController.model.updateOne({_id:id}, req.body));
+        const userId = await userRepository.findOne(id);
+        if(userId) {
+            userId.email = req.body.email;
+            userId.password = req.body.password;
+            return res.json(await userRepository.save(userId));
+        }
     }
     static delete = async(req:Request, res:Response) => {
+        const userRepository = getRepository(User);
         const {id} = req.params;
-        return res.json(await UserController.model.deleteOne({_id:id}));
+        const user = await userRepository.findOne(id);
+
+        if (user) {
+            return res.json(await userRepository.softRemove(user));
+        }
     }
     static findById = async(req:Request, res:Response) => {
+        const user = getRepository(User);
         const {id} = req.params;
-        return res.json(await UserController.model.findOne({_id:id}));
+        return res.json(await user.findOne(id));
     }
     static findAll= async (req:Request, res:Response) => {
-        return res.json({users:await UserController.model.find({})});
-     }
+        const userRepository = getRepository(User);
+        return res.json({users:await userRepository.find({})});
+    }
 }
 
 export {UserController};

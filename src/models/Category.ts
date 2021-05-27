@@ -4,11 +4,14 @@ import { Todo } from './Todo';
 
 @Entity()
 class Category extends BaseModel{
-    @Column('varchar')
+    @Column({
+        nullable:false,
+        unique:true
+    })
     public title!:string;
 
-    @ManyToMany(() => Todo, (todo) => todo.category)
-    public todos!:Todo[];
+    @ManyToMany(() => Todo, (todo) => todo.categories)
+    public todos?:Todo[];
 }
 
 export{Category};
