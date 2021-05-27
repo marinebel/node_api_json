@@ -1,12 +1,20 @@
-import { getModelForClass } from '@typegoose/typegoose';
 import { NextFunction, Request, Response } from 'express';
 import { User } from '../../../models/User';
 import {sign, verify} from 'jsonwebtoken';
+import { getRepository } from 'typeorm';
 
 class AuthController {
-    static model = getModelForClass(User);
+    // static model = getModelForClass(User);
     static login = async (req:Request, res:Response, next:NextFunction)=>{
-        const {user} = await AuthController.model.authenticate()(req.body.email, req.body.password);
+
+        // const {user} = await AuthController.model.authenticate()(req.body.email, req.body.password);
+        const userRepository = getRepository(User);
+        const user = await userRepository.findOne({
+            where: {
+                email : req.body.email,
+                password: req.body.password
+            }
+        });
         if(user){
             // eslint-disable-next-line no-console
             console.log(user);
@@ -26,7 +34,7 @@ class AuthController {
     }
 
     static authorize = async(req:Request, res:Response, next:NextFunction)=>{
-    
+        console.log(req.headers.authorization);
         try{
             const jwtToken = req.headers.authorization?.split(' ')[1] || 'notoken';
             const userId = await verify(jwtToken, process.env.JWT_SECRET);
