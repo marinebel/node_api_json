@@ -1,27 +1,45 @@
-import { getModelForClass } from '@typegoose/typegoose';
 import { Request, response, Response } from 'express';
+import { getRepository } from 'typeorm';
 import { Category } from '../../../models/Category';
 
 class CategoryController {
-    static model = getModelForClass(Category);
+    
     static findAll= async (req:Request, res:Response) => {
-       return res.json({categories:await CategoryController.model.find()});
+        const categoryRepository = getRepository(Category);
+       return res.json({categories:await categoryRepository.find()});
     }
 
     static create = async(req:Request, res:Response) => {
-        return res.json(await CategoryController.model.create(req.body));
+        const categoryRepository = getRepository(Category);
+        const newcategory = categoryRepository.create({
+            title:req.body.title
+        });
+
+        await categoryRepository.save(newcategory);
+        return res.json({categories:await categoryRepository.find({})});
     }
     static update = async(req:Request, res:Response) => {
+        const categoryRepository = getRepository(Category);
         const {id} = req.params;
-        return res.json(await CategoryController.model.updateOne({_id:id}, req.body));
+        const categoryId = await categoryRepository.findOne(id);
+        if(categoryId) {
+            categoryId.title = req.body.email;
+            return res.json(await categoryRepository.save(categoryId));
+        }
     }
     static delete = async(req:Request, res:Response) => {
+        const categoryRepository = getRepository(Category);
         const {id} = req.params;
-        return res.json(await CategoryController.model.deleteOne({_id:id}));
+        const category = await categoryRepository.findOne(id);
+
+        if (category) {
+            return res.json(await categoryRepository.softRemove(category));
+        }
     }
     static findById = async(req:Request, res:Response) => {
+        const categoryRepository = getRepository(Category);
         const {id} = req.params;
-        return res.json(await CategoryController.model.findOne({_id:id}));
+        return res.json(await categoryRepository.findOne(id));
     }
 }
 

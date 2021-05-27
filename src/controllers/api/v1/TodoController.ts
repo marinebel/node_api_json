@@ -9,11 +9,17 @@ class TodoController {
     
     static findAll= async (req:Request, res:Response) => {
         const model = getRepository(Todo);
-        const userModel = getRepository(User);
-        const tokenUserId = verify(req.headers.authorization?.split(' ')[1], process.env.JWT_SECRET).data;
-        const user = await userModel.findOne(tokenUserId);
+        // const userModel = getRepository(User);
+        // const tokenUserId = verify(req.headers.authorization?.split(' ')[1], process.env.JWT_SECRET).data;
+        // const user = await userModel.findOne(tokenUserId);
         if(req.query.filterByCategory){
-            // return res.json({todos:await TodoController.model.find({user, category:req.query.filterByCategory}).populate('category')});
+            return res.json({todos:await model.find({
+                where: {
+                    categories: req.query.filterByCategory
+                }
+                //    relations: ['category']
+               })
+            });
         }
        return res.json({todos:await model.find({
         //    relations: ['category']
@@ -24,10 +30,10 @@ class TodoController {
     static create = async(req:Request, res:Response) => {
         // const todo:Todo = new TodoController.model(req.body);
         const model = getRepository(Todo);
-        const userModel = getRepository(User);
-        const tokenUserId = verify(req.headers.authorization?.split(' ')[1], process.env.JWT_SECRET).data;
-        const user = await userModel.findOne(tokenUserId);
-        req.body.user=user;
+        // const userModel = getRepository(User);
+        // const tokenUserId = verify(req.headers.authorization?.split(' ')[1], process.env.JWT_SECRET).data;
+        // const user = await userModel.findOne(tokenUserId);
+        // req.body.user=user;
         const newTodo = model.create({
             title: req.body.title,
             description: req.body.description
