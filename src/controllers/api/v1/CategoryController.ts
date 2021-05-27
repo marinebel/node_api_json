@@ -5,41 +5,66 @@ import { Category } from '../../../models/Category';
 class CategoryController {
     
     static findAll= async (req:Request, res:Response) => {
-        const categoryRepository = getRepository(Category);
-       return res.json({categories:await categoryRepository.find()});
+        const allCategories = await getRepository(Category).find();
+        return res.json({categories: allCategories});
     }
 
     static create = async(req:Request, res:Response) => {
         const categoryRepository = getRepository(Category);
-        const newcategory = categoryRepository.create({
-            title:req.body.title
-        });
-
+        const newcategory = categoryRepository.create(req.body);
         await categoryRepository.save(newcategory);
-        return res.json({categories:await categoryRepository.find({})});
+        return res.json(newcategory);
     }
+
     static update = async(req:Request, res:Response) => {
         const categoryRepository = getRepository(Category);
-        const {id} = req.params;
-        const categoryId = await categoryRepository.findOne(id);
-        if(categoryId) {
-            categoryId.title = req.body.email;
-            return res.json(await categoryRepository.save(categoryId));
+        const preloadedCategory = await categoryRepository.preload({
+            id: parseInt(req.params.id),
+            ...req.body
+        });
+        
+        if(preloadedCategory === undefined) {
+            throw new Error(`Category ${req.params.id} not found`);
         }
+
+        await categoryRepository.save(preloadedCategory);
+        return res.json(preloadedCategory);
     }
+
     static delete = async(req:Request, res:Response) => {
         const categoryRepository = getRepository(Category);
         const {id} = req.params;
-        const category = await categoryRepository.findOne(id);
+        const { soft } = req.query;
 
-        if (category) {
-            return res.json(await categoryRepository.softRemove(category));
+        const categoryToDelete = await categoryRepository.findOne(id, {
+            withDeleted: true
+        });
+
+        if(categoryToDelete === undefined) {
+            throw new Error(`Category ${req.params.id} not found`);
         }
+        // ?soft=true
+        if(soft) {
+            await categoryRepository.softRemove(categoryToDelete);
+        } else {
+            await categoryRepository.remove(categoryToDelete);
+        }
+
+        return res.json({
+            status: soft ? 'soft deleted': 'hard deleted'
+        });
     }
     static findById = async(req:Request, res:Response) => {
-        const categoryRepository = getRepository(Category);
         const {id} = req.params;
-        return res.json(await categoryRepository.findOne(id));
+        const { withSoft } = req.query;
+        const category = await getRepository(Category).findOne(id, {
+            withDeleted: Boolean(withSoft)
+        });
+
+        if(category === undefined) {
+            throw new Error(`Category ${req.params.id} not found`);
+        }
+        return res.json({category});
     }
 }
 
