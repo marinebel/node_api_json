@@ -1,22 +1,22 @@
-import { Column, Entity, ManyToOne, ManyToMany, JoinTable } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
 import { BaseModel } from './base.model';
 import { Category } from './Category';
 import { User } from './User';
 
 @Entity()
 class Todo extends BaseModel {
-    @Column({nullable:false, unique:true})
-    public title!:string;
-    
+    @Column({nullable: false, unique: true})
+    public title!: string;
+
     @Column('text')
-    public description?:string;
-    
+    public description?: string;
+
     @ManyToMany(() => Category, (category) => category.todos)
     @JoinTable()
-    public categories?:Category[]
-    
+    public categories?: Category[];
+
     @ManyToOne(() => User, (user) => user.todos)
-    public user?:User;
+    public user?: User;
 }
 
-export{Todo};
+export { Todo };
