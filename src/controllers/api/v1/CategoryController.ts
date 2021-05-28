@@ -4,7 +4,11 @@ import { Category } from '../../../models/Category';
 
 class CategoryController {
     static findAll= async (req:Request, res:Response) => {
-        const allCategories = await getRepository(Category).find();
+        const queryBuilder = getRepository(Category).createQueryBuilder('category');
+        const allCategories = await queryBuilder
+        .select()
+        .leftJoinAndSelect('category.todos', 'category.todos')
+        .getMany();
         return res.json({ categories: allCategories });
     }
 
@@ -55,11 +59,19 @@ class CategoryController {
     
     static findById = async(req:Request, res:Response) => {
         const {id} = req.params;
-        const { withSoft } = req.query;
+        const queryBuilder = getRepository(Category).createQueryBuilder('category');
+        const category = await queryBuilder
+        .select()
+        .where('category.id = :id', {
+            id
+        })
+        .leftJoinAndSelect('category.todos', 'category.todos')
+        .getOne();
+        // const { withSoft } = req.query;
 
-        const category = await getRepository(Category).findOne(id, {
-            withDeleted: Boolean(withSoft)
-        });
+        // const category = await getRepository(Category).findOne(id, {
+        //     withDeleted: Boolean(withSoft)
+        // });
 
         if (category === undefined) {
             throw new Error(`Category ${req.params.id} not found`);
