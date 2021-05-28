@@ -20,26 +20,32 @@ class TodoController {
             process.env.JWT_SECRET || 'Potato'
         ) as Record<string, any>;
         
-        const user = await TodoController.userRepository!.findOne(data);
+        const queryBuilder = getRepository(Todo).createQueryBuilder('todo');
+        const todos = await queryBuilder
+            .select()
+            .where('todo.userId = :id', {
+                id:data
+            })
+            .leftJoinAndSelect('todo.categories', 'todo.category')
+            .leftJoinAndSelect('todo.user', 'todo.user')
+            .getMany();
+        // const user = await TodoController.userRepository!.findOne(data);
 
-        if (req.query.filterByCategory) {
-            const filteredByCategory = await TodoController.todoRepository!.find(
-                {
-                    relations: ['user', 'categories']
-                    // TODO : filter by User and category name
-                }
-            );
+        // if (req.query.filterByCategory) {
+        //     const filteredByCategory = await TodoController.todoRepository!.find(
+        //         {
+        //             relations: ['user', 'categories']
+        //             // TODO : filter by User and category name
+        //         }
+        //     );
 
-            return res.json({
-                todos: filteredByCategory
-            });
-        }
+        //     return res.json({
+        //         todos: filteredByCategory
+        //     });
+        // }
 
         return res.json({
-            todos: await TodoController.todoRepository!.find({
-                relations: ['user', 'categories']
-                // TODO : filter by User
-            })
+            todos
         });
     };
 
